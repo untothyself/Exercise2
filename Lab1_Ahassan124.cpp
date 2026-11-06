@@ -47,6 +47,80 @@ private:
         "--.."  // Z
     };
 
+
+/**
+ * @brief Handles user input and translates full sentences.
+ */
+class TranslationApp
+{
+private:
+    MorseTranslator translator;
+
+    /**
+     * @brief Translates each English letter in a sentence.
+     * @param sentence The sentence entered by the user.
+     * @return Nothing.
+     */
+    void translateSentence(const char sentence[])
+    {
+        bool printedLetter = false;
+
+        // Go through the sentence one character at a time.
+        for (int i = 0; sentence[i] != '\0'; i++)
+        {
+            const char* morse =
+                translator.getMorseCode(sentence[i]);
+
+            // Skip spaces, numbers, and punctuation.
+            if (morse[0] != '\0')
+            {
+                // Separate Morse symbols with a space.
+                if (printedLetter)
+                {
+                    cout << " ";
+                }
+
+                cout << morse;
+                printedLetter = true;
+            }
+        }
+
+        if (!printedLetter)
+        {
+            cout << "(No English letters found)";
+        }
+
+        cout << endl;
+    }
+
+public:
+    /**
+     * @brief Gets a sentence and displays its Morse code.
+     * @return Nothing.
+     */
+    void runOnce()
+    {
+        char sentence[52];
+
+        cout << "Enter a sentence (max 50 characters): ";
+        cin.getline(sentence, 52);
+
+        // Reject input that's longer than 50 characters.
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(10000, '\n');
+
+            cout << "Please enter 50 characters or less."
+                 << endl;
+            return;
+        }
+
+        cout << "\nMorse Code:" << endl;
+        translateSentence(sentence);
+    }
+};
+
 public:
     /**
      * @brief Finds the Morse code for an English letter.
@@ -76,14 +150,12 @@ public:
  * @brief Starts the Morse code translation program.
  * @return 0 if the program finishes successfully.
  */
+
 int main()
 {
-    // Create our translator and few letters.
-    MorseTranslator translator;
-
-    cout << "A: " << translator.getMorseCode('A') << endl;
-    cout << "b: " << translator.getMorseCode('b') << endl;
-    cout << "Z: " << translator.getMorseCode('Z') << endl;
+    // Start the application and translate one sentence.
+    TranslationApp app;
+    app.runOnce();
 
     return 0;
 }
