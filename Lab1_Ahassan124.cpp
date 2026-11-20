@@ -143,6 +143,32 @@ public:
         cout << "\nMorse Code:" << endl;
         translateSentence(sentence);
     }
+
+    /**
+     * @brief Keeps the translator running until the user quits.
+     * @return Nothing.
+     */
+    void run()
+    {
+        char another = 'Y';
+
+        // Keep translating while the user wants to continue.
+        while (another == 'Y' || another == 'y')
+        {
+            runOnce();
+
+            cout << "\nTranslate another sentence? (Y/N): ";
+            cin >> another;
+
+            // Clear leftover input before reading another sentence.
+            cin.ignore(10000, '\n');
+
+            cout << endl;
+        }
+
+        cout << "Thanks for using the Morse Code Translator!"
+             << endl;
+    }
 };
 
 /**
@@ -153,7 +179,7 @@ int main()
 {
     // Start the application and translate one sentence.
     TranslationApp app;
-    app.runOnce();
+    app.run();
 
     return 0;
 }
