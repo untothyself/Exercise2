@@ -70,6 +70,28 @@ public:
         // Find the matching Morse code using the letter's position.
         return morseCodes[letter - 'A'];
     }
+
+    /**
+     * @brief Finds the English letter for a Morse code pattern.
+     * @param morse The Morse code pattern to look up.
+     * @return The matching English letter, or '\0' if not found.
+     */
+    char getEnglishLetter(const char morse[]) const
+    {
+        // Check each Morse code pattern in our array.
+        for (int i = 0; i < 26; i++)
+        {
+            // strcmp returns 0 when both strings match.
+            if (strcmp(morse, morseCodes[i]) == 0)
+            {
+                // Convert the array position back into a letter.
+                return static_cast<char>('A' + i);
+            }
+        }
+
+        // Return an empty character if nothing matches.
+        return '\0';
+    }
 };
 
 /**
