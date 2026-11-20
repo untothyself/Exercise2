@@ -47,6 +47,30 @@ private:
         "--.."  // Z
     };
 
+public:
+    /**
+     * @brief Finds the Morse code for an English letter.
+     * @param letter The character we want to translate.
+     * @return The Morse code, or an empty string for invalid characters.
+     */
+    const char *getMorseCode(char letter) const
+    {
+        // Make lowercase letters uppercase before looking them up.
+        if (letter >= 'a' && letter <= 'z')
+        {
+            letter = toupper(letter);
+        }
+
+        // Skip anything that isn't an English letter.
+        if (letter < 'A' || letter > 'Z')
+        {
+            return "";
+        }
+
+        // Find the matching Morse code using the letter's position.
+        return morseCodes[letter - 'A'];
+    }
+};
 
 /**
  * @brief Handles user input and translates full sentences.
@@ -68,7 +92,7 @@ private:
         // Go through the sentence one character at a time.
         for (int i = 0; sentence[i] != '\0'; i++)
         {
-            const char* morse =
+            const char *morse =
                 translator.getMorseCode(sentence[i]);
 
             // Skip spaces, numbers, and punctuation.
@@ -105,7 +129,7 @@ public:
         cout << "Enter a sentence (max 50 characters): ";
         cin.getline(sentence, 52);
 
-        // Reject input that's longer than 50 characters.
+        // Reject input that's too long for the buffer.
         if (cin.fail())
         {
             cin.clear();
@@ -121,36 +145,10 @@ public:
     }
 };
 
-public:
-    /**
-     * @brief Finds the Morse code for an English letter.
-     * @param letter The character we want to translate.
-     * @return The Morse code, or an empty string for invalid characters.
-     */
-    const char *getMorseCode(char letter) const
-    {
-        // Make lowercase letters uppercase before looking them up.
-        if (letter >= 'a' && letter <= 'z')
-        {
-            letter = toupper(letter);
-        }
-
-        // Skip anything that isn't an English letter.
-        if (letter < 'A' || letter > 'Z')
-        {
-            return "";
-        }
-
-        // Find the matching Morse code using the letter's position.
-        return morseCodes[letter - 'A'];
-    }
-};
-
 /**
  * @brief Starts the Morse code translation program.
  * @return 0 if the program finishes successfully.
  */
-
 int main()
 {
     // Start the application and translate one sentence.
