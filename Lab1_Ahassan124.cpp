@@ -129,7 +129,7 @@ public:
         cout << "Enter a sentence (max 50 characters): ";
         cin.getline(sentence, 52);
 
-        // Reject input that's too long for the buffer.
+        // Handle input that's too long for our array.
         if (cin.fail())
         {
             cin.clear();
@@ -137,6 +137,21 @@ public:
 
             cout << "Please enter 50 characters or less."
                  << endl;
+            return;
+        }
+
+        // Check the actual length, including spaces.
+        if (strlen(sentence) > 50)
+        {
+            cout << "Please enter 50 characters or less."
+                 << endl;
+            return;
+        }
+
+        // Don't translate an empty sentence.
+        if (sentence[0] == '\0')
+        {
+            cout << "Please enter a sentence." << endl;
             return;
         }
 
@@ -157,11 +172,21 @@ public:
         {
             runOnce();
 
-            cout << "\nTranslate another sentence? (Y/N): ";
-            cin >> another;
+            // Ask again if the user doesn't enter Y or N.
+            do
+            {
+                cout << "\nTranslate another sentence? (Y/N): ";
+                cin >> another;
+                cin.ignore(10000, '\n');
 
-            // Clear leftover input before reading another sentence.
-            cin.ignore(10000, '\n');
+                if (another != 'Y' && another != 'y' &&
+                    another != 'N' && another != 'n')
+                {
+                    cout << "Please enter Y or N." << endl;
+                }
+
+            } while (another != 'Y' && another != 'y' &&
+                     another != 'N' && another != 'n');
 
             cout << endl;
         }
