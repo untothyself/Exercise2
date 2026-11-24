@@ -1,24 +1,23 @@
-
 /**
  * @file Lab1_Ahassan124.cpp
  * @author Abass Hassan
  * @date 2026-10-30
- * @brief Translates English sentences into Morse code.
- *        Also supports Morse to English translation.
+ * @brief Translates English sentences into Morse code and Morse code into English.
  */
 
 #include <iostream>
-#include <cctype> // For toupper()
+#include <cctype>  // For toupper()
+#include <cstring> // For strlen() and strcmp()
 using namespace std;
 
 /**
- * @brief Handles translating English letters into Morse code.
+ * @brief Handles looking up English letters and their Morse code patterns.
  */
 class MorseTranslator
 {
 private:
     // Morse code for A through Z, in alphabetical order.
-    const char *morseCodes[26] = {
+    const char* morseCodes[26] = {
         ".-",   // A
         "-...", // B
         "-.-.", // C
@@ -53,7 +52,7 @@ public:
      * @param letter The character we want to translate.
      * @return The Morse code, or an empty string for invalid characters.
      */
-    const char *getMorseCode(char letter) const
+    const char* getMorseCode(char letter) const
     {
         // Make lowercase letters uppercase before looking them up.
         if (letter >= 'a' && letter <= 'z')
@@ -84,18 +83,16 @@ public:
             // strcmp returns 0 when both strings match.
             if (strcmp(morse, morseCodes[i]) == 0)
             {
-                // Convert the array position back into a letter.
                 return static_cast<char>('A' + i);
             }
         }
 
-        // Return an empty character if nothing matches.
         return '\0';
     }
 };
 
 /**
- * @brief Handles user input and translates full sentences.
+ * @brief Handles user input and translating full sentences in either direction.
  */
 class TranslationApp
 {
@@ -103,43 +100,48 @@ private:
     MorseTranslator translator;
 
     /**
-     * @brief Translates each English letter in a sentence.
+     * @brief Translates each English letter in a sentence into Morse code.
      * @param sentence The sentence entered by the user.
      * @return Nothing.
      */
     void translateSentence(const char sentence[])
     {
         bool printedLetter = false;
+        bool pendingWordSpace = false;
 
         // Go through the sentence one character at a time.
         for (int i = 0; sentence[i] != '\0'; i++)
         {
-
-            // Use a slash to separate words in Morse code.
+            // Remember a word break, but don't print it unless another letter follows.
             if (sentence[i] == ' ')
             {
                 if (printedLetter)
                 {
-                    cout << " /";
+                    pendingWordSpace = true;
                 }
-
                 continue;
             }
 
-            const char *morse =
-                translator.getMorseCode(sentence[i]);
+            const char* morse = translator.getMorseCode(sentence[i]);
 
-            // Skip spaces, numbers, and punctuation.
+            // Skip numbers and punctuation.
             if (morse[0] != '\0')
             {
-                // Separate Morse symbols with a space.
                 if (printedLetter)
                 {
-                    cout << " ";
+                    if (pendingWordSpace)
+                    {
+                        cout << " / ";
+                    }
+                    else
+                    {
+                        cout << " ";
+                    }
                 }
 
                 cout << morse;
                 printedLetter = true;
+                pendingWordSpace = false;
             }
         }
 
@@ -160,14 +162,14 @@ private:
     {
         char currentCode[501];
         int codeLength = 0;
-        bool printedSomething = false;
+        bool printedLetter = false;
+        bool pendingWordSpace = false;
 
-        // Go through the Morse code one character at a time.
-        for (int i = 0;; i++)
+        // Read one Morse pattern at a time, separated by spaces or a slash.
+        for (int i = 0; ; i++)
         {
             char symbol = sentence[i];
 
-            // Build one Morse code pattern.
             if (symbol != ' ' && symbol != '/' && symbol != '\0')
             {
                 currentCode[codeLength] = symbol;
@@ -175,14 +177,18 @@ private:
             }
             else
             {
-                // Translate the pattern when we reach a separator.
                 if (codeLength > 0)
                 {
                     currentCode[codeLength] = '\0';
-
                     char letter = translator.getEnglishLetter(currentCode);
 
-                    // Show a question mark for unknown Morse patterns.
+                    // Print just one space between words, not at the ends.
+                    if (printedLetter && pendingWordSpace)
+                    {
+                        cout << " ";
+                    }
+
+                    // Use a question mark if the pattern isn't an English letter.
                     if (letter == '\0')
                     {
                         cout << "?";
@@ -192,18 +198,17 @@ private:
                         cout << letter;
                     }
 
+                    printedLetter = true;
+                    pendingWordSpace = false;
                     codeLength = 0;
-                    printedSomething = true;
                 }
 
-                // A slash represents a space between words.
-                if (symbol == '/')
+                // A slash marks the break between two words.
+                if (symbol == '/' && printedLetter)
                 {
-                    cout << " ";
-                    printedSomething = true;
+                    pendingWordSpace = true;
                 }
 
-                // Stop when we reach the end of the sentence.
                 if (symbol == '\0')
                 {
                     break;
@@ -211,7 +216,7 @@ private:
             }
         }
 
-        if (!printedSomething)
+        if (!printedLetter)
         {
             cout << "(No Morse code entered)";
         }
@@ -221,7 +226,7 @@ private:
 
 public:
     /**
-     * @brief Gets a sentence and displays its Morse code.
+     * @brief Gets one English sentence and displays its Morse code.
      * @return Nothing.
      */
     void runOnce()
@@ -231,26 +236,23 @@ public:
         cout << "Enter a sentence (max 50 characters): ";
         cin.getline(sentence, 52);
 
-        // Handle input that's too long for our array.
+        // Clear the input if the sentence is too long.
         if (cin.fail())
         {
             cin.clear();
             cin.ignore(10000, '\n');
 
-            cout << "Please enter 50 characters or less."
-                 << endl;
+            cout << "Please enter 50 characters or less." << endl;
             return;
         }
 
-        // Check the actual length, including spaces.
+        // A 51-character sentence fits the array but is still too long.
         if (strlen(sentence) > 50)
         {
-            cout << "Please enter 50 characters or less."
-                 << endl;
+            cout << "Please enter 50 characters or less." << endl;
             return;
         }
 
-        // Don't translate an empty sentence.
         if (sentence[0] == '\0')
         {
             cout << "Please enter a sentence." << endl;
@@ -262,7 +264,7 @@ public:
     }
 
     /**
-     * @brief Gets Morse code from the user and translates it.
+     * @brief Gets Morse code from the user and translates it into English.
      * @return Nothing.
      */
     void runMorseToEnglish()
@@ -273,7 +275,6 @@ public:
              << "and / between words): ";
         cin.getline(morseSentence, 501);
 
-        // Handle input that's too long.
         if (cin.fail())
         {
             cin.clear();
@@ -283,7 +284,6 @@ public:
             return;
         }
 
-        // Don't translate empty input.
         if (morseSentence[0] == '\0')
         {
             cout << "Please enter some Morse code." << endl;
@@ -295,14 +295,13 @@ public:
     }
 
     /**
-     * @brief Displays the translation menu until the user quits.
+     * @brief Displays the translation menu until the user chooses Quit.
      * @return Nothing.
      */
     void run()
     {
         int choice = 0;
 
-        // Keep showing the menu until the user chooses Quit.
         while (choice != 3)
         {
             cout << "\n=== Morse Code Translator ===" << endl;
@@ -313,7 +312,7 @@ public:
 
             cin >> choice;
 
-            // Handle letters or other non-number menu input.
+            // Clear invalid menu input and ask again.
             if (cin.fail())
             {
                 if (cin.eof())
@@ -323,12 +322,11 @@ public:
 
                 cin.clear();
                 cin.ignore(10000, '\n');
-
                 cout << "Please enter 1, 2, or 3." << endl;
                 continue;
             }
 
-            // Remove the newline before using getline().
+            // Remove the newline before the next getline().
             cin.ignore(10000, '\n');
 
             if (choice == 1)
@@ -341,8 +339,7 @@ public:
             }
             else if (choice == 3)
             {
-                cout << "Thanks for using the Morse Code Translator!"
-                     << endl;
+                cout << "Thanks for using the Morse Code Translator!" << endl;
             }
             else
             {
@@ -353,12 +350,11 @@ public:
 };
 
 /**
- * @brief Starts the Morse code translation program.
+ * @brief Starts the Morse code translator.
  * @return 0 if the program finishes successfully.
  */
 int main()
 {
-    // Start the application and translate one sentence.
     TranslationApp app;
     app.run();
 
